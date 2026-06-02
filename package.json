@@ -1,0 +1,36 @@
+{
+  "name": "@cinatra-ai/blog-draft-writer-agent",
+  "version": "0.1.6",
+  "license": "Apache-2.0",
+  "description": "Stateless LLM-only leaf agent that takes a BlogIdea (title, summary, outline) plus optional tone, length, audience, voice, referenceContent, and sources, and returns a polished markdown blog draft with title, excerpt, content, and optional sourcesUsed. No HITL, no tool calls, no web_search — pure LLM generation. Caller chains web-research-agent upstream if research is needed.",
+  "type": "module",
+  "cinatra": {
+    "apiVersion": "cinatra.ai/v1",
+    "kind": "agent",
+    "dependencies": [
+      {
+        "packageName": "@cinatra-ai/context-selection-agent",
+        "edgeType": "runtime",
+        "versionConstraint": {
+          "kind": "semver-range",
+          "range": "*"
+        },
+        "requirement": "required",
+        "kind": "agent"
+      }
+    ],
+    "packageType": "agent",
+    "manifestVersion": 1,
+    "sourceTemplateId": "blog-draft-writer-agent-flow",
+    "sourceVersionId": "8bf00702-a2f1-4a3b-8422-10bc36e16d24",
+    "sourceVersionNumber": 1,
+    "type": "flow",
+    "riskLevel": "low",
+    "hasApprovalGates": true,
+    "toolAccess": [],
+    "ownerOrgId": null,
+    "agentDependencies": {
+      "@cinatra-ai/context-selection-agent": "^0.1.1"
+    }
+  }
+}
