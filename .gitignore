@@ -1,0 +1,30 @@
+# --- Dependencies ---
+node_modules/
+
+# Standalone extension repos ship no committed lockfile — CI installs with
+# --no-frozen-lockfile (see .github/workflows/ci.yml).
+pnpm-lock.yaml
+
+# --- Build output (tsconfig outDir) ---
+dist/
+*.tsbuildinfo
+
+# --- Testing ---
+coverage/
+
+# --- npm pack output ---
+*.tgz
+
+# --- Env files & secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Debug logs ---
+*.log
+
+# --- OS / editor / local-only ---
+.DS_Store
+.idea/
+.vscode/
+.claude/
