@@ -1,6 +1,10 @@
 {
   "name": "@cinatra-ai/blog-draft-writer-agent",
   "version": "0.1.0",
+  "files": [
+    "cinatra",
+    "skills"
+  ],
   "license": "Apache-2.0",
   "description": "Stateless LLM-only leaf agent that takes a BlogIdea (title, summary, outline) plus optional tone, length, audience, voice, referenceContent, and sources, and returns a polished markdown blog draft with title, excerpt, content, and optional sourcesUsed. No HITL, no tool calls, no web_search — pure LLM generation. Caller chains web-research-agent upstream if research is needed.",
   "type": "module",
