@@ -23,6 +23,7 @@
         "kind": "agent"
       }
     ],
+    "consumes": [],
     "packageType": "agent",
     "manifestVersion": 1,
     "sourceTemplateId": "blog-draft-writer-agent-flow",
