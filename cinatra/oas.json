@@ -3,7 +3,7 @@
   "component_type": "Flow",
   "id": "blog-draft-writer-agent-flow",
   "name": "Blog Draft Writer Agent",
-  "description": "Stateless LLM-only leaf agent that takes a BlogIdea (title, summary, outline) plus optional tone, length, audience, voice, referenceContent, and sources, and returns a polished markdown blog draft with title, excerpt, content, and optional sourcesUsed. No HITL, no tool calls, no web_search \u2014 pure LLM generation. Caller chains web-research-agent upstream if research is needed.",
+  "description": "Stateless LLM-only leaf agent that takes a BlogIdea (title, summary, outline) plus optional tone, length, audience, voice, referenceContent, and sources, and returns a polished markdown blog draft (title, excerpt, content, sourcesUsed) that the host persists as a @cinatra-ai/blog-post-artifact. No HITL, no tool calls, no web_search \u2014 pure LLM generation. Caller chains web-research-agent upstream if research is needed.",
   "metadata": {
     "cinatra": {
       "type": "flow",
@@ -98,8 +98,25 @@
   ],
   "outputs": [
     {
-      "title": "draft",
-      "type": "object"
+      "title": "title",
+      "type": "string"
+    },
+    {
+      "title": "excerpt",
+      "type": "string"
+    },
+    {
+      "title": "content",
+      "type": "string"
+    },
+    {
+      "title": "sourcesUsed",
+      "type": "array",
+      "json_schema": {
+        "items": {
+          "type": "string"
+        }
+      }
     },
     {
       "title": "notes",
@@ -242,15 +259,51 @@
     },
     {
       "component_type": "DataFlowEdge",
-      "name": "write_draft_to_end_draft",
+      "name": "write_title_to_end_title",
       "source_node": {
         "$component_ref": "write"
       },
-      "source_output": "draft",
+      "source_output": "title",
       "destination_node": {
         "$component_ref": "end"
       },
-      "destination_input": "draft"
+      "destination_input": "title"
+    },
+    {
+      "component_type": "DataFlowEdge",
+      "name": "write_excerpt_to_end_excerpt",
+      "source_node": {
+        "$component_ref": "write"
+      },
+      "source_output": "excerpt",
+      "destination_node": {
+        "$component_ref": "end"
+      },
+      "destination_input": "excerpt"
+    },
+    {
+      "component_type": "DataFlowEdge",
+      "name": "write_content_to_end_content",
+      "source_node": {
+        "$component_ref": "write"
+      },
+      "source_output": "content",
+      "destination_node": {
+        "$component_ref": "end"
+      },
+      "destination_input": "content"
+    },
+    {
+      "component_type": "DataFlowEdge",
+      "name": "write_sourcesUsed_to_end_sourcesUsed",
+      "source_node": {
+        "$component_ref": "write"
+      },
+      "source_output": "sourcesUsed",
+      "destination_node": {
+        "$component_ref": "end"
+      },
+      "destination_input": "sourcesUsed"
     },
     {
       "component_type": "DataFlowEdge",
@@ -431,7 +484,7 @@
       "http_method": "POST",
       "data": {
         "agent_id": "blog-draft-writer-agent",
-        "system": "You are a stateless blog draft writer agent. Follow the SKILL.md step-by-step. Do NOT call any MCP tool. Return a single JSON object with {draft: {title, excerpt, content, sourcesUsed?}, notes} \u2014 nothing else, no Markdown wrapping.",
+        "system": "You are a stateless blog draft writer agent. Follow the SKILL.md step-by-step. Do NOT call any MCP tool. Return a single JSON object with {title, excerpt, content, sourcesUsed, notes} \u2014 nothing else, no Markdown wrapping.",
         "user": "Write a blog draft from the following inputs.\nInputs:\n- idea: {{ idea }}\n- tone: {{ tone }}\n- length: {{ length }}\n- referenceContent: {{ referenceContent }}\n- audience: {{ audience }}\n- voice: {{ voice }}\n- sources: {{ sources }}\n- contextSlotBindings: {{ contextSlotBindings }}",
         "agent_run_id": "{{ agent_run_id }}",
         "cinatra_llm": {
@@ -509,8 +562,25 @@
       ],
       "outputs": [
         {
-          "title": "draft",
-          "type": "object"
+          "title": "title",
+          "type": "string"
+        },
+        {
+          "title": "excerpt",
+          "type": "string"
+        },
+        {
+          "title": "content",
+          "type": "string"
+        },
+        {
+          "title": "sourcesUsed",
+          "type": "array",
+          "json_schema": {
+            "items": {
+              "type": "string"
+            }
+          }
         },
         {
           "title": "notes",
@@ -532,9 +602,37 @@
       "name": "End",
       "outputs": [
         {
-          "title": "draft",
-          "type": "object",
-          "default": {}
+          "title": "title",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "title": "excerpt",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "title": "content",
+          "type": "string",
+          "default": "",
+          "cinatra": {
+            "artifact": {
+              "extension": "@cinatra-ai/blog-post-artifact",
+              "contentFrom": "content",
+              "declaredMime": "text/markdown",
+              "titleFrom": "title"
+            }
+          }
+        },
+        {
+          "title": "sourcesUsed",
+          "type": "array",
+          "json_schema": {
+            "items": {
+              "type": "string"
+            }
+          },
+          "default": []
         },
         {
           "title": "notes",
