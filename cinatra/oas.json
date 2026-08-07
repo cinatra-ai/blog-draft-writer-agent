@@ -56,6 +56,18 @@
         },
         "required": [
           "title"
+        ],
+        "anyOf": [
+          {
+            "required": [
+              "summary"
+            ]
+          },
+          {
+            "required": [
+              "outline"
+            ]
+          }
         ]
       }
     },
@@ -454,6 +466,18 @@
             },
             "required": [
               "title"
+            ],
+            "anyOf": [
+              {
+                "required": [
+                  "summary"
+                ]
+              },
+              {
+                "required": [
+                  "outline"
+                ]
+              }
             ]
           }
         },
@@ -551,6 +575,18 @@
             },
             "required": [
               "title"
+            ],
+            "anyOf": [
+              {
+                "required": [
+                  "summary"
+                ]
+              },
+              {
+                "required": [
+                  "outline"
+                ]
+              }
             ]
           }
         },
