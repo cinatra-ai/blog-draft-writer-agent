@@ -13,6 +13,16 @@
     "displayName": "Blog Draft Writer Agent",
     "dependencies": [
       {
+        "packageName": "@cinatra-ai/blog-post-artifact",
+        "edgeType": "runtime",
+        "versionConstraint": {
+          "kind": "semver-range",
+          "range": "^0.1.0"
+        },
+        "requirement": "required",
+        "kind": "artifact"
+      },
+      {
         "packageName": "@cinatra-ai/context-selection-agent",
         "edgeType": "runtime",
         "versionConstraint": {
