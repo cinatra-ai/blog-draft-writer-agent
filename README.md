@@ -1,8 +1,8 @@
 # Blog Draft Writer Agent
 
-Turn a blog idea into a polished markdown draft, ready to review and publish. Hand the agent an idea — a title, a summary, and an outline — then dial in tone, length, audience, and voice. The agent writes a structured draft with a working title, a short excerpt, and a clean markdown body, optionally weaving in your reference content and citing the sources you supply. It is a stateless, LLM-only leaf: no web search, no tool calls, no stored state. If you need fresh research before drafting, chain a web-research agent upstream and pass the results as `referenceContent`.
+Turn a blog idea into a polished markdown draft, ready to review and publish. Hand the agent one idea as a single line of free text, then dial in tone, length, audience, and voice. The agent writes a draft with a working title, a short excerpt, and a clean markdown body, optionally weaving in your reference content and citing your sources. It is a stateless, LLM-only leaf: no web search, no tool calls, no stored state. For fresh research, chain a web-research agent upstream into `referenceContent`.
 
-The required input is an `idea` object (schema-declared `{title, summary, outline}`) with `title` and either `summary` or `outline`. Optional inputs include `tone` (default `informative`; also `casual`, `technical`, `executive`, or any free-form descriptor), `length` (default `medium` ≈ 800 words; also `short` ≈ 400, `long` ≈ 1500, or a free-form `"1200 words"` pattern), `audience`, `voice` (brand voice instructions or example sentences), `referenceContent` (background material to draw from without attribution), and `sources` (an array of `{title, url}` objects that may be cited inline). The output is `title`, `excerpt`, `content` (markdown), and a `sourcesUsed` list, plus a `notes` string with operator-readable caveats. The platform persists `content` as a `@cinatra-ai/blog-post-artifact` titled from `title`. An empty/invalid or non-object `idea` returns empty draft fields with a distinct `idea_was_empty_or_invalid` or `idea_was_non_object` `notes` value rather than throwing. No credentials or external service access are required; the platform routes the generation call.
+The required input is an `idea` object (`{title, summary, outline}`) of which only `title` is required. The setup form is ONE field named Idea and submits `{"title": "<your text>"}`; the agent derives the summary and outline from it and says so in `notes`. An empty Idea is refused before the run resumes. Optional inputs include `tone` (default `informative`; also `casual`, `technical`, `executive`, or free-form), `length` (default `medium` ≈ 800 words; also `short` ≈ 400, `long` ≈ 1500, or a free-form `"1200 words"` pattern), `audience`, `voice` (brand voice instructions or examples), `referenceContent` (background material used without attribution), and `sources` (an array of `{title, url}` objects cited inline). The output is `title`, `excerpt`, `content` (markdown), and a `sourcesUsed` list, plus a `notes` string of operator-readable caveats. The platform persists `content` as a `@cinatra-ai/blog-post-artifact` titled from `title`. An empty or non-object `idea` returns empty draft fields with a distinct `idea_was_empty_or_invalid` or `idea_was_non_object` note instead of throwing. No credentials are required; the platform routes the generation call.
 
 ## Works with
 
@@ -12,9 +12,9 @@ The required input is an `idea` object (schema-declared `{title, summary, outlin
 
 ## Capabilities
 
-- Write a complete blog draft from a title, summary, and outline
+- Write a complete blog draft from one free-text idea, or a full title, summary, and outline
 - Adapt tone, length, audience, and voice to match the brief
-- Weave reference content and brand voice context into the draft without attributing the source material
-- Cite caller-supplied sources inline and return the used URLs in `sourcesUsed`
-- Produce a reusable draft artifact the rest of the blog pipeline can pick up
-- Return a graceful empty-draft response instead of throwing when the idea input is missing or invalid
+- Weave reference content and brand voice into the draft without attributing the source material
+- Cite caller-supplied sources inline and return used URLs in `sourcesUsed`
+- Produce a reusable draft artifact the blog pipeline can pick up
+- Return a graceful empty-draft response when the idea input is missing or invalid
