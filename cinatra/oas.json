@@ -30,7 +30,8 @@
       ],
       "produces": [
         {
-          "extension": "@cinatra-ai/blog-post-artifact"
+          "extension": "@cinatra-ai/blog-post-artifact",
+          "objectTypeId": "@cinatra-ai/blog-post-artifact:post"
         }
       ]
     }
