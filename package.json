@@ -1,17 +1,30 @@
 {
   "name": "@cinatra-ai/blog-draft-writer-agent",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "files": [
     "cinatra"
   ],
   "license": "Apache-2.0",
-  "description": "Stateless leaf agent that takes a BlogIdea (title required; summary and outline optional) plus optional tone, length, audience, voice, referenceContent, and sources, and returns a polished markdown blog draft (title, excerpt, content, sourcesUsed) that the host persists as a @cinatra-ai/blog-post-artifact. The flow pauses once to collect the operator's idea. Single bridge invocation; no toolbox is declared, so platform default-toolbox injection applies. Caller chains web-research-agent upstream if research is needed.",
+  "scripts": {
+    "test": "sh -c \"node --test\""
+  },
+  "description": "Stateless leaf agent that takes ONE plain-text idea and writes a blog draft (title, excerpt, markdown content, sources used, notes). The host files the content as a @cinatra-ai/blog-post-artifact through the declarative EndNode binding. The person sees one field: the idea.",
   "type": "module",
   "cinatra": {
     "apiVersion": "cinatra.ai/v1",
     "kind": "agent",
     "displayName": "Blog Draft Writer Agent",
     "dependencies": [
+      {
+        "packageName": "@cinatra-ai/blog-idea-artifact",
+        "edgeType": "runtime",
+        "versionConstraint": {
+          "kind": "semver-range",
+          "range": "^0.1.0"
+        },
+        "requirement": "required",
+        "kind": "artifact"
+      },
       {
         "packageName": "@cinatra-ai/blog-post-artifact",
         "edgeType": "runtime",
@@ -49,7 +62,8 @@
     },
     "produces": [
       {
-        "extension": "@cinatra-ai/blog-post-artifact"
+        "extension": "@cinatra-ai/blog-post-artifact",
+        "objectTypeId": "@cinatra-ai/blog-post-artifact:post"
       }
     ]
   }
