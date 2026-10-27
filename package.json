@@ -36,6 +36,16 @@
         "kind": "artifact"
       },
       {
+        "packageName": "@cinatra-ai/brand-voice-artifact",
+        "edgeType": "runtime",
+        "versionConstraint": {
+          "kind": "semver-range",
+          "range": "^0.1.0"
+        },
+        "requirement": "required",
+        "kind": "artifact"
+      },
+      {
         "packageName": "@cinatra-ai/context-selection-agent",
         "edgeType": "runtime",
         "versionConstraint": {
@@ -56,6 +66,12 @@
     "riskLevel": "low",
     "hasApprovalGates": true,
     "toolAccess": [],
+    "tools": [
+      {
+        "name": "brand_voice_text",
+        "module": "./cinatra/tools/brand-voice-text.mjs"
+      }
+    ],
     "ownerOrgId": null,
     "agentDependencies": {
       "@cinatra-ai/context-selection-agent": "^0.1.1"
