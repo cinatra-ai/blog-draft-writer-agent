@@ -580,32 +580,7 @@
         },
         {
           "title": "brandVoiceContextSlotBindings",
-          "type": "array",
-          "json_schema": {
-            "items": {
-              "type": "object",
-              "properties": {
-                "artifactId": {
-                  "type": "string"
-                },
-                "representationRevisionId": {
-                  "type": "string"
-                },
-                "semanticAssertionId": {
-                  "type": "string"
-                },
-                "extension": {
-                  "type": "string"
-                },
-                "sourceScope": {
-                  "type": "string"
-                },
-                "ownerId": {
-                  "type": "string"
-                }
-              }
-            }
-          }
+          "type": "string"
         }
       ],
       "outputs": [
