@@ -127,3 +127,16 @@ test("the idea context still reaches the writing step from its own resolution st
   assert.equal(edge.destination_input, "draftContextContextSlotBindings");
   assert.match(refs.write.data.user, /\{\{ draftContextContextSlotBindings \}\}/);
 });
+
+test("the writing step takes a handed-down brand-voice pick as text, the type the host gives it", () => {
+  // When a parent satisfies the slot, the host's loader (cinatra
+  // `docker/wayflow/context_subflow_injection.py`, `_ensure_input`) gives this
+  // flow's start node the input `brandVoiceContextSlotBindings` as a string and
+  // feeds it to the step that takes it. The typed graph refuses an edge from a
+  // string into an array, so the step must take the pick as a string. Run alone,
+  // the injected list step's array is cast to that string.
+  const input = refs.write.inputs.find((i) => i.title === "brandVoiceContextSlotBindings");
+  assert.ok(input, "the write step has no brand-voice input");
+  assert.equal(input.type, "string");
+  assert.equal(input.json_schema, undefined, "a string input carries no array schema");
+});
