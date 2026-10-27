@@ -8,7 +8,7 @@ The required input is an `idea` object (`{title, summary, outline}`) of which on
 
 - Cinatra platform (agent runtime required)
 - `@cinatra-ai/blog-idea-artifact` — optional slot `draftContext`: a structured idea from a prior step
-- `@cinatra-ai/brand-voice-artifact` — optional slot `brandVoice`: one stored brand voice, which the blog pipeline fills
+- `@cinatra-ai/brand-voice-artifact` — optional slot `brandVoice`: one stored brand voice (the blog pipeline fills it), read as text
 
 ## Capabilities
 
