@@ -76,7 +76,7 @@ test("the post binding and the produces entry are typed", () => {
   ]);
 });
 
-test("the writer declares the idea kind it READS as a dependency edge", () => {
+test("the writer declares the kinds it READS as dependency edges: the idea and the brand voice", () => {
   const names = manifest.cinatra.dependencies
     .filter((d) => d.kind === "artifact")
     .map((d) => d.packageName)
@@ -84,5 +84,6 @@ test("the writer declares the idea kind it READS as a dependency edge", () => {
   assert.deepEqual(names, [
     "@cinatra-ai/blog-idea-artifact",
     "@cinatra-ai/blog-post-artifact",
+    "@cinatra-ai/brand-voice-artifact",
   ]);
 });

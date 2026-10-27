@@ -104,16 +104,28 @@ test("the brand-voice slot is declared only, so a parent can satisfy it", () => 
   assert.equal(oas.metadata.cinatra.packageName, PACKAGE, "the loader finds the slot's owner by package");
 });
 
-test("the writing step takes the brand-voice pick by the slot's own input name", () => {
-  const titles = refs.write.inputs.map((i) => i.title);
-  assert.ok(titles.includes("brandVoiceContextSlotBindings"), "the write step has no brand-voice input");
+test("the read step takes the brand-voice pick by the slot's own input name, as text", () => {
+  // The loader feeds the pick to the step that takes `brandVoiceContextSlotBindings`
+  // (cinatra `docker/wayflow/context_subflow_injection.py`, `_consumer_edges_for_slot`).
+  // When a parent satisfies the slot, `_ensure_input` gives this flow's start node
+  // that input as a string, and the typed graph refuses an edge from a string into
+  // an array, so the read step takes it as a string. Run alone, the injected list
+  // step's array is cast to that string.
+  const input = (refs.read_brand_voice?.inputs ?? []).find((i) => i.title === "brandVoiceContextSlotBindings");
+  assert.ok(input, "the read step has no brand-voice input");
+  assert.equal(input.type, "string");
+  assert.equal(input.json_schema, undefined, "a string input carries no array schema");
+  const takers = Object.entries(refs)
+    .filter(([, c]) => c?.component_type !== "Flow")
+    .filter(([, c]) => (c?.inputs ?? []).some((i) => i.title === "brandVoiceContextSlotBindings"))
+    .map(([id]) => id);
+  assert.deepEqual(takers, ["read_brand_voice"], "only the read step takes the pick");
   // Two slots: the loader refuses a bare `contextSlotBindings` input.
   for (const [id, c] of Object.entries(refs)) {
     if (c?.component_type === "Flow") continue;
     const bare = (c?.inputs ?? []).some((i) => i.title === "contextSlotBindings");
     assert.equal(bare, false, `${id} still takes the bare contextSlotBindings input`);
   }
-  assert.match(refs.write.data.user, /\{\{ brandVoiceContextSlotBindings \}\}/);
 });
 
 test("the idea context still reaches the writing step from its own resolution step", () => {
@@ -128,15 +140,50 @@ test("the idea context still reaches the writing step from its own resolution st
   assert.match(refs.write.data.user, /\{\{ draftContextContextSlotBindings \}\}/);
 });
 
-test("the writing step takes a handed-down brand-voice pick as text, the type the host gives it", () => {
-  // When a parent satisfies the slot, the host's loader (cinatra
-  // `docker/wayflow/context_subflow_injection.py`, `_ensure_input`) gives this
-  // flow's start node the input `brandVoiceContextSlotBindings` as a string and
-  // feeds it to the step that takes it. The typed graph refuses an edge from a
-  // string into an array, so the step must take the pick as a string. Run alone,
-  // the injected list step's array is cast to that string.
-  const input = refs.write.inputs.find((i) => i.title === "brandVoiceContextSlotBindings");
-  assert.ok(input, "the write step has no brand-voice input");
+test("the read step reads the picked brand voice's text through this pack's declared tool", () => {
+  // The pick names a stored artifact and carries none of its text, and reading an
+  // artifact's content is this pack's own job: the host's passthrough runs the
+  // tool this pack declares, `brand_voice_text`, with the content read bound to
+  // the run (cinatra `src/lib/extension-scoped-tools.ts`).
+  const read = refs.read_brand_voice;
+  assert.ok(read, "the flow has no read step");
+  assert.equal(read.component_type, "ApiNode");
+  assert.equal(read.url, "{{CINATRA_BASE_URL}}/api/agents/passthrough");
+  assert.equal(read.http_method, "POST");
+  assert.deepEqual(read.data, {
+    tool: "extension_tool",
+    input: { name: "brand_voice_text", input: { bindings: "{{ brandVoiceContextSlotBindings }}" } },
+    agent_run_id: "{{ cinatra_run_id }}",
+  });
+  const out = read.outputs.find((o) => o.title === "brandVoiceText");
+  assert.ok(out, "the read step gives no brandVoiceText");
+  assert.equal(out.type, "string");
+  assert.ok(
+    oas.data_flow_connections.some(
+      (e) =>
+        e.source_node.$component_ref === "start" &&
+        e.source_output === "cinatra_run_id" &&
+        e.destination_node.$component_ref === "read_brand_voice" &&
+        e.destination_input === "cinatra_run_id",
+    ),
+    "the read step is not given the run",
+  );
+});
+
+test("the writing step writes from the brand voice's text, after it is read", () => {
+  const titles = refs.write.inputs.map((i) => i.title);
+  assert.ok(!titles.includes("brandVoiceContextSlotBindings"), "the write step still takes the references");
+  const input = refs.write.inputs.find((i) => i.title === "brandVoiceText");
+  assert.ok(input, "the write step takes no brand-voice text");
   assert.equal(input.type, "string");
-  assert.equal(input.json_schema, undefined, "a string input carries no array schema");
+  const edges = oas.data_flow_connections.filter((e) => e.destination_node.$component_ref === "write" && e.destination_input === "brandVoiceText");
+  assert.deepEqual(
+    edges.map((e) => [e.source_node.$component_ref, e.source_output]),
+    [["read_brand_voice", "brandVoiceText"]],
+  );
+  assert.match(refs.write.data.user, /\{\{ brandVoiceText \}\}/);
+  assert.doesNotMatch(refs.write.data.user + refs.write.data.system, /brandVoiceContextSlotBindings/);
+  const into = (id) => oas.control_flow_connections.filter((e) => e.to_node.$component_ref === id).map((e) => e.from_node.$component_ref);
+  assert.deepEqual(into("write"), ["read_brand_voice"], "the write step runs right after the read");
+  assert.deepEqual(into("read_brand_voice"), ["context_draftContext"], "the read runs after the step's own context");
 });
