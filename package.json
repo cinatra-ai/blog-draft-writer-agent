@@ -1,6 +1,6 @@
 {
   "name": "@cinatra-ai/blog-draft-writer-agent",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "files": [
     "cinatra"
   ],
@@ -8,7 +8,7 @@
   "scripts": {
     "test": "sh -c \"node --test\""
   },
-  "description": "Stateless leaf agent that takes ONE plain-text idea and writes a blog draft (title, excerpt, markdown content, sources used, notes). The host files the content as a @cinatra-ai/blog-post-artifact through the declarative EndNode binding. The person sees one field: the idea.",
+  "description": "Stateless leaf agent that takes ONE plain-text idea and writes a blog draft (title, excerpt, markdown content, sources used, notes). The host files the content as a @cinatra-ai/blog-post-artifact through the declarative EndNode binding. The person sees one field: the idea. An optional, hidden `note` input (empty by default) carries revision instructions for a draft written again.",
   "type": "module",
   "cinatra": {
     "apiVersion": "cinatra.ai/v1",
