@@ -193,12 +193,12 @@ async function refusalOf(input, answer = TEXT, listing = LISTED) {
   return r;
 }
 
-test("the manifest declares the tool as one { name, module } entry", () => {
+test("the manifest declares the tool as one { name, module, embeddable } entry", () => {
   const tools = manifest.cinatra.tools;
   assert.ok(Array.isArray(tools), "cinatra.tools is an array");
   const entry = tools.find((t) => t && t.name === TOOL_NAME);
   assert.ok(entry, `the list declares "${TOOL_NAME}"`);
-  assert.deepEqual(Object.keys(entry).sort(), ["module", "name"]);
+  assert.deepEqual(Object.keys(entry).sort(), ["embeddable", "module", "name"]);
   assert.equal(entry.module, MODULE_PATH);
   assert.match(entry.name, /^[a-z][a-z0-9_]*$/);
   assert.equal(tools.filter((t) => t && t.name === TOOL_NAME).length, 1, "declared once");
@@ -547,4 +547,51 @@ test("every sentence the module can stop a run with is one the host repeats as i
   for (const s of REFUSAL_SENTENCES) assert.equal(hostSentenceIssue(s), null, s);
   // and every sentence a case above saw is one of them
   for (const s of seenSentences) assert.ok(REFUSAL_SENTENCES.includes(s), s);
+});
+
+// cinatra-ai/cinatra#3033: this package's consent that an agent embedding its
+// flow (the Blog Pipeline) may run this tool from this package. The host's
+// extension-tool origin resolver admits a call from an embedded copy of the
+// flow's `read_brand_voice` step only when this package's own declaration marks
+// the tool `embeddable`. It reads `cinatra.tools[].embeddable` as an own data
+// property, and only the JSON boolean `true` is consent: a missing key or an own
+// `false` is refused as not embeddable.
+
+/** The fixed tool names of every extension_tool step of this flow. */
+function extensionToolNames(node, found = []) {
+  if (Array.isArray(node)) for (const v of node) extensionToolNames(v, found);
+  else if (node && typeof node === "object") {
+    if (node.component_type === "ApiNode" && node.data?.tool === "extension_tool") {
+      found.push(node.data.input?.name);
+    }
+    for (const v of Object.values(node)) extensionToolNames(v, found);
+  }
+  return found;
+}
+
+test("#3033: the tool declares embeddable as the own JSON boolean true", () => {
+  const entry = manifest.cinatra.tools.find((t) => t && t.name === TOOL_NAME);
+  assert.ok(entry, `the list declares "${TOOL_NAME}"`);
+  assert.ok(Object.hasOwn(entry, "embeddable"), "embeddable is an own key of the tool entry");
+  assert.strictEqual(entry.embeddable, true);
+});
+
+test("#3033: every tool an extension_tool step of this flow calls is declared embeddable", () => {
+  const oas = JSON.parse(readFileSync(join(root, "cinatra", "oas.json"), "utf8"));
+  const names = [...new Set(extensionToolNames(oas))];
+  assert.deepEqual(names, [TOOL_NAME]);
+  for (const name of names) {
+    const entry = manifest.cinatra.tools.find((t) => t && t.name === name);
+    assert.ok(entry, `${name} is declared`);
+    assert.strictEqual(entry.embeddable, true, `${name} is embeddable`);
+  }
+});
+
+test("#3033: a tool entry carries only name, module and a boolean embeddable", () => {
+  for (const entry of manifest.cinatra.tools) {
+    for (const key of Object.keys(entry)) {
+      assert.ok(["name", "module", "embeddable"].includes(key), `unexpected key ${key}`);
+    }
+    if (Object.hasOwn(entry, "embeddable")) assert.equal(typeof entry.embeddable, "boolean");
+  }
 });

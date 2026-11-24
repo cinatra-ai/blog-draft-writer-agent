@@ -1,6 +1,6 @@
 {
   "name": "@cinatra-ai/blog-draft-writer-agent",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "files": [
     "cinatra"
   ],
@@ -69,7 +69,8 @@
     "tools": [
       {
         "name": "brand_voice_text",
-        "module": "./cinatra/tools/brand-voice-text.mjs"
+        "module": "./cinatra/tools/brand-voice-text.mjs",
+        "embeddable": true
       }
     ],
     "ownerOrgId": null,
